@@ -4,51 +4,60 @@
     <meta charset="UTF-8">
     <title>Registro</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Importar la fuente desde Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Puedes cambiar "Roboto" por la fuente que prefieras -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <!-- Barra de título con fondo azul -->
         <header>
-            <!-- Esquina superior izquierda: Tabasco -->
             <div class="header-left">CONTEC Tabasco</div>
-            <h1>CHECADOR PASAJEROS</h1>
-            <!-- Esquina superior derecha: Fecha actual -->
+            <h1>Control de Transporte</h1>
             <div class="header-right">
                 <div id="currentDate"></div>
             </div>
         </header>
         
         <div class="login-box">
-            <!-- Nuevo título dentro del recuadro -->
-            <h2>Autobus 1</h2>
+            <div class="selection">
+                <label for="busSelect">Autobús:</label>
+                <select id="busSelect">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <label for="shiftSelect">Turno:</label>
+                <select id="shiftSelect">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
             <!-- Indicador LED de estado de Internet -->
             <div id="internetStatus" class="led"></div>
             <div id="time"></div>
             <input type="text" id="barcodeInput" autofocus placeholder="Escanea tu código de barras" />
-            <!-- Mensaje de estado -->
             <div id="status"></div>
-            <!-- Loader -->
             <div id="loader" class="loader"></div>
             <!-- Mensaje de datos pendientes -->
             <div id="pendingData" class="pending-data"></div>
         </div>
-        
-        <!-- Contador de registros en la esquina inferior izquierda -->
+
         <div class="counter">
             <div class="counter-box">
                 Registros totales: <span id="totalRecords">0</span>
             </div>
         </div>
         
-        <!-- Espacio para el logo de la compañía en la esquina inferior derecha -->
         <div class="logo">
-            <!-- Inserta la imagen del logo aquí -->
-            <img src="logo.png" alt="Logo de la compañía">
+            <img src="logo.png" alt="SWS SYSTEMS">
         </div>
     </div>
 

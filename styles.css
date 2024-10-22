@@ -1,141 +1,167 @@
-/* Importar la fuente desde Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
 
-/* Modo oscuro */
 body {
     background-color: #121212;
     color: #FFFFFF;
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
+    overflow: hidden; 
+    opacity: 0; 
+    animation: fadeIn 1.5s forwards; 
 }
 
-/* Contenedor principal */
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
 .container {
     position: relative;
     height: 100vh;
 }
 
-/* Barra de título con fondo azul */
 header {
-    background-color: #0D47A1; /* Azul oscuro */
-    padding: 20px 0;
+    background-color: #0D47A1; 
+    padding: 1.5vw 0; 
     text-align: center;
     position: relative;
+    z-index: 1;
 }
 
 header h1 {
     margin: 0;
-    font-size: 32px;
+    font-size: 2.5vw; 
     color: #FFFFFF;
 }
 
-/* Esquina superior izquierda: Tabasco */
 .header-left {
     position: absolute;
     top: 50%;
-    left: 20px;
+    left: 1.5vw;
     transform: translateY(-50%);
-    font-size: 18px;
+    font-size: 1.4vw;
     color: #FFFFFF;
 }
 
-/* Esquina superior derecha: Fecha actual */
 .header-right {
     position: absolute;
     top: 50%;
-    right: 20px;
+    right: 1.5vw;
     transform: translateY(-50%);
+    color: #FFFFFF;
+    display: flex;
+    font-size: 1.4vw;
+    align-items: center;
+}
+
+.login-box {
+    background-color: #1E1E1E;
+    padding: 3vw;
+    border-radius: 1vw;
+    box-shadow: 0vw 0vw 3vw 0vw rgba(0, 0, 10, 2.7);
+    width: 30vw;
+    margin: 3vw auto;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    position: relative;
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.selection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5vw;
+}
+
+.selection label {
+    font-size: 1.5vw;
+    margin-right: 0.5vw;
+}
+
+.selection select {
+    font-size: 1.5vw;
+    padding: 0.5vw;
+    margin-right: 1.5vw;
+    border-radius: 0.5vw;
+    border: none;
+    background-color: #2C2C2C;
     color: #FFFFFF;
 }
 
-/* Caja de login */
-.login-box {
-    background-color: #1E1E1E;
-    padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-    width: 300px;
-    margin: 40px auto; /* Centrar horizontalmente */
-    text-align: center; /* Centrar texto */
-    position: relative; /* Para posicionar el LED dentro */
-}
-
-/* Nuevo título dentro del recuadro */
-.login-box h2 {
-    margin-top: 0;
-    font-size: 28px;
-    margin-bottom: 20px;
-}
-
-/* Indicador LED de estado de Internet */
 .led {
-    width: 15px;
-    height: 15px;
+    width: 1.5vw;
+    height: 1.5vw;
     border-radius: 50%;
-    background-color: red; /* Por defecto, rojo */
-    box-shadow: 0 0 5px red;
+    background-color: red;
+    box-shadow: 0 0 1vw red;
     animation: blink 1s infinite;
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 2vw;
+    right: 2vw;
 }
 
-/* Animación de parpadeo */
 @keyframes blink {
     0%, 50% { opacity: 1; }
     50.01%, 100% { opacity: 0; }
 }
 
-/* Reloj */
 #time {
-    font-size: 36px;
-    margin-bottom: 20px;
-    border: 2px solid #FFFFFF; /* Agregar marco al reloj */
-    padding: 10px;
-    border-radius: 5px;
+    font-size: 2.5vw;
+    margin-bottom: 2vw;
+    border: 0.3vw solid #ffffff;
+    padding: 0.5vw;
+    border-radius: 0.5vw;
     display: inline-block;
 }
 
-/* Campo de entrada */
 #barcodeInput {
-    font-size: 18px;
-    padding: 10px;
-    width: 100%;
+    font-size: 1.2vw;
+    padding: 1vw;
+    width: 85%;
     border: none;
-    border-radius: 4px;
-    margin-bottom: 20px;
+    font-weight: bolder;
+    border-radius: 0.5vw;
+    margin-bottom: -9vw;
     text-align: center;
 }
 
-/* Estilo del estado */
 #status {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: #27ae60; /* Verde */
-    /* Animación de brillo */
+    font-size: 1.5vw;
+    margin-top: 11vw;
+    margin-bottom: -3vw;
+    color: #27ae60;
+    font-weight: bold;
     animation: glow 1s ease-in-out infinite alternate;
 }
 
-/* Animación de brillo */
+#status.error {
+    color: red; /* Color rojo para el mensaje de error */
+    font-weight: bold;
+    text-shadow: none; /* Sin animación de glow */
+}
+
 @keyframes glow {
     from {
-        text-shadow: 0 0 10px #27ae60;
+        text-shadow: 0 0 2vw #27ae60;
     }
     to {
-        text-shadow: 0 0 20px #27ae60;
+        text-shadow: 0 0 4vw #27ae60;
     }
 }
 
-/* Loader */
 .loader {
-    border: 6px solid #1E1E1E;
-    border-top: 6px solid #3498db;
+    border-top: 0.5vw solid #3498db;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px auto;
+    width: 5vw;
+    height: 5vw;
+    animation: spin 0.5s linear infinite;
+    margin: 3vw auto -3vw auto;
     display: none;
 }
 
@@ -144,31 +170,28 @@ header h1 {
     100% { transform: rotate(360deg); }
 }
 
-/* Mensaje de datos pendientes */
 .pending-data {
-    font-size: 16px;
-    color: #f1c40f; /* Amarillo */
-    margin-top: 10px;
+    font-size: 1.2vw;
+    color: #f1c40f;
+    margin-top: 3vw;
+    font-weight: bold;
 }
 
-/* Contador de registros en la esquina inferior izquierda */
 .counter {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    font-size: 16px;
+    bottom: 2vw;
+    left: 2vw;
+    font-size: 1.5vw;
 }
 
-/* Contador dentro de un recuadro */
 .counter-box {
     background-color: #1E1E1E;
-    padding: 10px 15px;
-    border-radius: 5px;
-    border: 1px solid #FFFFFF;
+    padding: 0.5vw 1vw;
+    border-radius: 0.5vw;
+    border: 0.2vw solid #FFFFFF;
     display: inline-block;
 }
 
-/* Animación cuando el número cambia */
 .counter-box span {
     display: inline-block;
     transition: transform 0.3s ease;
@@ -178,13 +201,12 @@ header h1 {
     transform: scale(1.5);
 }
 
-/* Espacio para el logo en la esquina inferior derecha */
 .logo {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 2vw;
+    right: 0vw;
 }
 
 .logo img {
-    height: 50px; /* Ajusta el tamaño según tus necesidades */
+    height: 4vw;
 }

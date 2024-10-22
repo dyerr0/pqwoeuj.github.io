@@ -1,35 +1,40 @@
 let totalRecords = 0;
-let pendingRecords = [];
+let storedRecords = []; // Lista para almacenar los registros escaneados
+let busNumber = 1;
+let shiftNumber = 1;
 
-// Mostrar la hora actual en tiempo real
+// Variable para el nombre del proyecto (prefijo del archivo CSV)
+let projectName = 'CLK'; // Puedes cambiar 'CLK' por el nombre que desees
+
 function updateTime() {
     const now = new Date();
-    const timeString = now.toLocaleTimeString('es-MX', { hour12: false });
+    const timeString = now.toLocaleTimeString('en-GB', { hour12: false });
     document.getElementById('time').textContent = timeString;
 }
 setInterval(updateTime, 1000);
 updateTime();
 
-// Mostrar la fecha actual en el header
 function updateDate() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateString = now.toLocaleDateString('es-MX', options);
+    const dateString = now.toLocaleDateString('en-GB', options);
     document.getElementById('currentDate').textContent = dateString;
 }
 updateDate();
 
-// Función para actualizar el estado del LED
+// Actualizar la fecha cada hora
+setInterval(updateDate, 3600000);
+
 function updateInternetStatus() {
     const led = document.getElementById('internetStatus');
     if (navigator.onLine) {
-        // Conexión disponible
+        // Conexion disponible
         led.style.backgroundColor = 'green';
-        led.style.boxShadow = '0 0 5px green';
+        led.style.boxShadow = '0 0 5vw green';
     } else {
-        // Sin conexión
+        // Sin conexion
         led.style.backgroundColor = 'red';
-        led.style.boxShadow = '0 0 5px red';
+        led.style.boxShadow = '0 0 5vw red';
     }
 }
 updateInternetStatus();
@@ -37,72 +42,70 @@ updateInternetStatus();
 // Actualizar el estado del LED cada cierto tiempo
 setInterval(updateInternetStatus, 2000);
 
-// Función para enviar datos a Google Sheets
-function sendToGoogleSheets(barcode, timestamp) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw2rNv5s8ZYAuzhqaOmfup1p3pxb723O2Y-vbuUE66xI-5Ggni3amME-RvRGMVVcCpw/exec';
-    const formData = new FormData();
-    formData.append('barcode', barcode);
-    formData.append('timestamp', timestamp);
-
-    // Mostrar el loader
-    document.getElementById('loader').style.display = 'block';
-    // Ocultar el mensaje de registro exitoso
-    document.getElementById('status').textContent = '';
-    document.getElementById('status').style.animation = 'none';
-
-    fetch(scriptURL, { method: 'POST', body: formData })
-        .then(response => response.text())
-        .then(result => {
-            // Ocultar el loader
-            document.getElementById('loader').style.display = 'none';
-            
-            // Incrementar el contador de registros
-            totalRecords++;
-            updateCounter();
-            // Actualizar el contador en localStorage
-            localStorage.setItem('totalRecords', totalRecords);
-
-            // Mostrar mensaje de registro exitoso
-            document.getElementById('status').textContent = 'Registro exitoso';
-            // Reiniciar la animación de brillo
-            void document.getElementById('status').offsetWidth;
-            document.getElementById('status').style.animation = 'glow 1s ease-in-out infinite alternate';
-        })
-        .catch(error => {
-            // Ocultar el loader
-            document.getElementById('loader').style.display = 'none';
-            
-            // Almacenar el registro pendiente
-            savePendingRecord(barcode, timestamp);
-            // Mostrar mensaje de datos pendientes
-            updatePendingDataMessage();
-            console.error('Error al guardar el registro:', error);
-        });
-}
-
-// Manejar el ingreso del código de barras
-document.getElementById('barcodeInput').addEventListener('change', (event) => {
-    const barcode = event.target.value.trim();
-    if (barcode) {
-        const timestamp = new Date().toLocaleString('es-MX');
-        sendToGoogleSheets(barcode, timestamp);
-        event.target.value = ''; // Limpiar el campo después de enviar
+document.getElementById('barcodeInput').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        processBarcodeInput();
     }
 });
 
-// Mantener el foco en el campo de entrada
-document.getElementById('barcodeInput').addEventListener('blur', () => {
-    document.getElementById('barcodeInput').focus();
-});
+function processBarcodeInput() {
+    const barcodeInput = document.getElementById('barcodeInput');
+    const barcode = barcodeInput.value.trim();
+    const status = document.getElementById('status');
 
-// Inicializar el contador de registros
+    // Verificar si el codigo escaneado es el comando para descargar datos
+    if (barcode === '000000') { // Reemplaza '000000' por el numero especial que desees
+        downloadDataAsCSV();
+        barcodeInput.value = '';
+        status.textContent = 'Datos descargados y registros reiniciados';
+        status.classList.remove('error');
+        void status.offsetWidth;
+        status.style.animation = 'glow 1s ease-in-out infinite alternate';
+        return;
+    }
+
+    // Verificar que solo haya numeros y que la longitud sea de 6 caracteres
+    if (/^\d{6}$/.test(barcode)) {
+        const now = new Date();
+        const date = now.toLocaleDateString('en-GB');
+        const time = now.toLocaleTimeString('en-GB', { hour12: false });
+
+        // Restablecer el estado normal del mensaje
+        status.classList.remove('error');  // Quitar la clase de error
+        status.style.color = '';           // Restablecer el color predeterminado
+
+        saveRecord(barcode, date, time, busNumber, shiftNumber);
+        barcodeInput.value = ''; // Limpiar el campo después de guardar
+
+        // Mostrar mensaje de registro exitoso
+        status.textContent = 'Registro exitoso';
+        void status.offsetWidth;
+        status.style.animation = 'glow 1s ease-in-out infinite alternate';
+    } else {
+        // Mostrar mensaje de error en rojo
+        status.textContent = 'ID no reconocido';
+        status.classList.add('error');     // Aplicar la clase de error
+    }
+
+    // Reenfocar el campo de entrada
+    barcodeInput.focus();
+}
+
+function saveRecord(barcode, date, time, busNumber, shiftNumber) {
+    storedRecords.push({ barcode, date, time, busNumber, shiftNumber });
+    localStorage.setItem('storedRecords', JSON.stringify(storedRecords));
+
+    totalRecords++;
+    updateCounter();
+    localStorage.setItem('totalRecords', totalRecords);
+}
+
 function initializeCounter() {
     totalRecords = parseInt(localStorage.getItem('totalRecords')) || 0;
     document.getElementById('totalRecords').textContent = totalRecords;
 }
 initializeCounter();
 
-// Actualizar el contador y agregar animación
 function updateCounter() {
     const counterSpan = document.getElementById('totalRecords');
     counterSpan.textContent = totalRecords;
@@ -112,62 +115,65 @@ function updateCounter() {
     }, 300);
 }
 
-// Guardar registro pendiente
-function savePendingRecord(barcode, timestamp) {
-    // Obtener registros pendientes desde localStorage
-    pendingRecords = JSON.parse(localStorage.getItem('pendingRecords')) || [];
-    // Agregar nuevo registro
-    pendingRecords.push({ barcode, timestamp });
-    // Guardar en localStorage
-    localStorage.setItem('pendingRecords', JSON.stringify(pendingRecords));
-}
+// Al cargar la página, inicializar storedRecords desde localStorage
+storedRecords = JSON.parse(localStorage.getItem('storedRecords')) || [];
 
-// Enviar registros pendientes
-function sendPendingRecords() {
-    if (pendingRecords.length > 0) {
-        const record = pendingRecords[0];
-        sendToGoogleSheets(record.barcode, record.timestamp);
-        // Remover el registro enviado
-        pendingRecords.shift();
-        localStorage.setItem('pendingRecords', JSON.stringify(pendingRecords));
+// Función para descargar los datos en formato CSV
+function downloadDataAsCSV() {
+    if (storedRecords.length === 0) {
+        alert('No hay datos para descargar.');
+        return;
     }
+
+    // Construir el CSV
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Fecha,Hora,Codigo de Barras,Autobus,Turno\n';
+
+    storedRecords.forEach(record => {
+        const row = `${record.date},${record.time},${record.barcode},${record.busNumber},${record.shiftNumber}`;
+        csvContent += row + '\n';
+    });
+
+    // Crear el nombre del archivo
+    const now = new Date();
+    const dateString = now.toLocaleDateString('en-GB').replace(/\//g, "'");
+    const timeString = now.toLocaleTimeString('en-GB', { hour12: false }).replace(/:/g, ".");
+    const fileName = `${projectName}-${dateString}-${timeString}.csv`;
+
+    // Descargar el archivo
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Resetear los registros y el contador
+    storedRecords = [];
+    localStorage.removeItem('storedRecords');
+
+    totalRecords = 0;
+    updateCounter();
+    localStorage.removeItem('totalRecords');
 }
 
-// Actualizar mensaje de datos pendientes
-function updatePendingDataMessage() {
-    const pendingDataDiv = document.getElementById('pendingData');
-    pendingRecords = JSON.parse(localStorage.getItem('pendingRecords')) || [];
-    if (pendingRecords.length > 0) {
-        pendingDataDiv.textContent = 'Datos pendientes: Conéctate a Internet';
-    } else {
-        pendingDataDiv.textContent = '';
-    }
+function initializeSelections() {
+    busNumber = parseInt(localStorage.getItem('busNumber')) || 1;
+    shiftNumber = parseInt(localStorage.getItem('shiftNumber')) || 1;
+    document.getElementById('busSelect').value = busNumber;
+    document.getElementById('shiftSelect').value = shiftNumber;
 }
+initializeSelections();
 
-// Verificar conexión a Internet y enviar registros pendientes
-function checkInternetConnection() {
-    updateInternetStatus();
-    if (navigator.onLine) {
-        updatePendingDataMessage();
-        // Intentar enviar registros pendientes
-        pendingRecords = JSON.parse(localStorage.getItem('pendingRecords')) || [];
-        if (pendingRecords.length > 0) {
-            sendPendingRecords();
-        }
-    } else {
-        updatePendingDataMessage();
-    }
-}
-
-// Escuchar eventos de conexión/desconexión
-window.addEventListener('online', checkInternetConnection);
-window.addEventListener('offline', () => {
-    updateInternetStatus();
-    updatePendingDataMessage();
+document.getElementById('busSelect').addEventListener('change', (event) => {
+    busNumber = parseInt(event.target.value);
+    localStorage.setItem('busNumber', busNumber);
+    document.getElementById('barcodeInput').focus();
 });
 
-// Verificar conexión cada cierto tiempo
-setInterval(checkInternetConnection, 5000);
-
-// Al cargar la página, verificar si hay datos pendientes
-updatePendingDataMessage();
+document.getElementById('shiftSelect').addEventListener('change', (event) => {
+    shiftNumber = parseInt(event.target.value);
+    localStorage.setItem('shiftNumber', shiftNumber);
+    document.getElementById('barcodeInput').focus();
+});
